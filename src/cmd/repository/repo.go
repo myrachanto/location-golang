@@ -59,6 +59,9 @@ func LoadConfig() (open Duraion, err error) {
 
 //this function creates an order
 func (l *locationrepo) OrderLocation(order_id string, location *model.Location) (string, httperors.HttpErr) {
+	if err1 := location.Validate(); err1 != nil {
+		return "", err1
+	}
 	//check if the orderExist in memory
 	orderExist := l.orderExistById(order_id)
 	if orderExist != nil {
