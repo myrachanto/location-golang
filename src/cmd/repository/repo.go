@@ -56,6 +56,8 @@ func LoadConfig() (open Duraion, err error) {
 	err = viper.Unmarshal(&open)
 	return
 }
+
+//this function creates an order
 func (l *locationrepo) OrderLocation(order_id string, location *model.Location) (string, httperors.HttpErr) {
 	//check if the orderExist in memory
 	orderExist := l.orderExistById(order_id)
@@ -73,6 +75,7 @@ func (l *locationrepo) OrderLocation(order_id string, location *model.Location) 
 	return "location created successifully", nil
 }
 
+//check if the order exist
 func (l *locationrepo) orderExistById(order_id string) *model.Order {
 	for _, o := range l.Orders {
 		if o.OrderId == order_id {
@@ -83,6 +86,8 @@ func (l *locationrepo) orderExistById(order_id string) *model.Order {
 	return nil
 
 }
+
+//this is a private function adds to the in-memory database
 func (l *locationrepo) addtoLocationsToOrder(location *model.Location) {
 	for _, o := range l.Orders {
 		if o.OrderId == o.OrderId {
@@ -92,6 +97,8 @@ func (l *locationrepo) addtoLocationsToOrder(location *model.Location) {
 	}
 
 }
+
+// this functions queries the order with the maximum number of location histories as per the query
 func (l *locationrepo) GetMAxOrders(order_id string, max int) (order *model.Order, err httperors.HttpErr) {
 	log.Println("testing --------------", l.Orders)
 	orderring := model.Order{}
@@ -140,7 +147,6 @@ func (l *locationrepo) ClearHistory() {
 	if err != nil {
 		return
 	}
-	// log.Println("Clearing history initiated----------")
 	locations := []model.Location{}
 	ordr := &model.Order{}
 	for k, order := range l.Orders {
@@ -159,5 +165,4 @@ func (l *locationrepo) ClearHistory() {
 		// fmt.Println("ffffffffffffffff", order)
 
 	}
-	// fmt.Println("zzzzzzzzzzzzzzzzzzzz", l.Orders)
 }

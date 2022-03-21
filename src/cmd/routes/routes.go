@@ -37,10 +37,10 @@ func LoadConfig() (open Open, err error) {
 	return
 }
 func LocationApi() {
-	//check db connection//////////////////////
 	fmt.Println("initialization----------------")
 	controllers.NewlocationController(service.NewlocationService(repository.NewlocationRepo()))
 	e := echo.New()
+	//this function initiates a recusive function that call itself with a period of 60 seconds -- its subject to chage
 	repository.Locationrepo.StartClearHistory()
 	// Middleware
 	e.Use(middleware.Logger())
