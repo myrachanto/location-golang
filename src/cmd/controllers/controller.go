@@ -51,9 +51,13 @@ func (controller locationController) GetMAxOrders(c echo.Context) error {
 	order_id := c.Param("order_id")
 	max, err := strconv.Atoi(c.QueryParam("max"))
 	if err != nil {
-		httperror := httperors.NewBadRequestError("Invalid Max number")
-		return c.JSON(httperror.Code(), httperror)
+		max = 0
 	}
+
+	// if err != nil {
+	// 	httperror := httperors.NewBadRequestError("Invalid Max number")
+	// 	return c.JSON(httperror.Code(), httperror)
+	// }
 	// log.Println("----------------------------------- mwassssss", order_id, max)
 	results, err3 := service.LocationService.GetMAxOrders(order_id, max)
 	if err3 != nil {

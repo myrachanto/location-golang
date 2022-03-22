@@ -41,7 +41,7 @@ func LocationApi() {
 	controllers.NewlocationController(service.NewlocationService(repository.NewlocationRepo()))
 	e := echo.New()
 	//this function initiates a recusive function that call itself with a period of 60 seconds -- its subject to chage
-	repository.Locationrepo.StartClearHistory()
+	go repository.Locationrepo.StartClearHistory()
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())

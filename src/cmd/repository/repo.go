@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"time"
@@ -28,7 +29,6 @@ type LocationRepoInterface interface {
 	GetMAxOrders(order_id string, max int) (*model.Order, httperors.HttpErr)
 	orderExistById(order_id string) *model.Order
 	DeleteOrder(order_id string) (string, httperors.HttpErr)
-	addtoLocationsToOrder(location *model.Location)
 	StartClearHistory()
 	// removeorder(key int)
 }
@@ -66,8 +66,16 @@ func (l *locationrepo) OrderLocation(order_id string, location *model.Location) 
 	orderExist := l.orderExistById(order_id)
 	if orderExist != nil {
 		//add to the locations
+		fmt.Println("-------------------------------------", l.Orders)
 		location.Thetime = time.Now()
-		l.addtoLocationsToOrder(location)
+		locs := []model.Location{}
+		for j, g := range l.Orders {
+			if g.OrderId == order_id {
+				locs = append(locs, *location)
+			}
+			g.Location = append(g.Location, locs...)
+			l.Orders[j] = g
+		}
 		return "location added successifully", nil
 	}
 	order := &model.Order{}
@@ -90,37 +98,45 @@ func (l *locationrepo) orderExistById(order_id string) *model.Order {
 
 }
 
-//this is a private function adds to the in-memory database
-func (l *locationrepo) addtoLocationsToOrder(location *model.Location) {
-	for _, o := range l.Orders {
-		if o.OrderId == o.OrderId {
-			o.Location = append(o.Location, *location)
-			break
-		}
-	}
-
-}
-
 // this functions queries the order with the maximum number of location histories as per the query
 func (l *locationrepo) GetMAxOrders(order_id string, max int) (order *model.Order, err httperors.HttpErr) {
-	log.Println("testing --------------", l.Orders)
+	log.Println("testing --------------max", max)
 	orderring := model.Order{}
+	if max == 0 {
+		for _, o := range l.Orders {
+			log.Println("testing --------------", o)
+			l.sorttime(o.Location)
+			orderring = o
+		}
+		return &orderring, nil
+	}
 	for _, o := range l.Orders {
 		if o.OrderId == order_id {
-			orderring.OrderId = order_id
-			locations := []model.Location{}
-			for k, v := range o.Location {
-				if k <= max {
-					locations = append(locations, v)
-					break
-				}
+			if max > len(o.Location) {
+				orderring.OrderId = order_id
+				l.sorttime(o.Location)
+				orderring.Location = o.Location
+			} else {
+				orderring.OrderId = order_id
+				l.sorttime(o.Location)
+				orderring.Location = o.Location[:max]
 			}
-			orderring.Location = locations
-			break
 		}
 	}
 	return &orderring, nil
 }
+
+// sort time
+func (l *locationrepo) sorttime(dat []model.Location) {
+	for i := 0; i < len(dat); i++ {
+		for j := i + 1; j < len(dat); j++ {
+			if dat[i].Thetime.Unix() < dat[j].Thetime.Unix() {
+				dat[i], dat[j] = dat[j], dat[i]
+			}
+		}
+	}
+}
+
 func (l *locationrepo) DeleteOrder(order_id string) (string, httperors.HttpErr) {
 	orders := []model.Order{}
 	for _, o := range l.Orders {
